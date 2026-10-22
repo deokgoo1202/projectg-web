@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>(자칭) 대마법사 루루의 여정</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+  </head>
+  <body>
+    <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas" width=1920 height=1080 tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+      <div id="unity-warning"> </div>
+      <div id="unity-footer">
+        <div id="unity-logo-title-footer"></div>
+        <div id="unity-fullscreen-button"></div>
+        <div id="unity-build-title">대마법사 루루의 여정</div>
+      </div>
+    </div>
+    <div id="pg-rotate"><div>📱 ↻<br>가로로 돌려 주세요<br><small>누르면 전체 화면</small><br><a id="pg-apk" href="download.html">안드로이드 앱(APK) 받기</a></div></div>
+    <script>
+      var canvas = document.querySelector("#unity-canvas");
+
+      // Shows a temporary message banner/ribbon for a few seconds, or
+      // a permanent error message on top of the canvas if type=='error'.
+      // If type=='warning', a yellow highlight color is used.
+      // Modify or remove this function to customize the visually presented
+      // way that non-critical warnings and error messages are presented to the
+      // user.
+      function unityShowBanner(msg, type) {
+        var warningBanner = document.querySelector("#unity-warning");
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+        }
+        var div = document.createElement('div');
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        else {
+          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+          setTimeout(function() {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
+      }
+
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/Web.loader.js";
+      var config = {
+        arguments: [],
+        dataUrl: buildUrl + "/Web.data.unityweb",
+        frameworkUrl: buildUrl + "/Web.framework.js.unityweb",
+        codeUrl: buildUrl + "/Web.wasm.unityweb",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "DeokGoo",
+        productName: "대마법사 루루의 여정",
+        productVersion: "1.0",
+        showBanner: unityShowBanner,
+        // errorHandler: function(err, url, line) {
+        //    alert("error " + err + " occurred at line " + line);
+        //    // Return 'true' if you handled this error and don't want Unity
+        //    // to process it further, 'false' otherwise.
+        //    return true;
+        // },
+      };
+
+      // By default, Unity keeps WebGL canvas render target size matched with
+      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
+      // Set this to false if you want to decouple this synchronization from
+      // happening inside the engine, and you would instead like to size up
+      // the canvas DOM size and WebGL render target sizes yourself.
+      // config.matchWebGLToCanvasSize = false;
+
+      // If you would like all file writes inside Unity Application.persistentDataPath
+      // directory to automatically persist so that the contents are remembered when
+      // the user revisits the site the next time, uncomment the following line:
+      // config.autoSyncPersistentDataPath = true;
+      // This autosyncing is currently not the default behavior to avoid regressing
+      // existing user projects that might rely on the earlier manual
+      // JS_FileSystem_Sync() behavior, but in future Unity version, this will be
+      // expected to change.
+
+      // ProjectG — 창 크기 대응(DECISIONS F-58 · 2026-10-14 사용자 «웹 빌드의 창 크기에 따라 해상도도 대응되면 좋을거같아»).
+      //   도트 격자 640×360 을 창(실제 픽셀 = CSS × devicePixelRatio)에 들어가는 가장 큰 «정수» 배율로 키운다 — 칸마다 같은 크기라 도트가 안 뭉갠다.
+      //   남는 곳은 검게. 창이 640×360 보다 작으면 그때만 비정수로 줄인다. Unity 는 캔버스 CSS 크기 × devicePixelRatio 로 그린다(matchWebGLToCanvasSize).
+      //   🔄 10-19 휴대폰(F-58 모바일) — 정수 배율을 버리고 화면에 꽉 차게. 세로면 «가로로 돌려 주세요».
+      var PG_MOBILE = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
+      if (PG_MOBILE) {
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+      }
+      var PG_W = 640, PG_H = 360;
+      function pgFit() {
+        var dpr = window.devicePixelRatio || 1;
+        var pw = window.innerWidth * dpr, ph = window.innerHeight * dpr;
+        var r = Math.min(pw / PG_W, ph / PG_H);
+        var k = (r >= 1 && !PG_MOBILE) ? Math.floor(r) : r;
+        document.getElementById("pg-rotate").style.display = (PG_MOBILE && window.innerHeight > window.innerWidth) ? "flex" : "none";
+        canvas.style.width = (PG_W * k / dpr) + "px";
+        canvas.style.height = (PG_H * k / dpr) + "px";
+      }
+      pgFit();
+      window.addEventListener("resize", pgFit);
+      window.addEventListener("orientationchange", function () { setTimeout(pgFit, 300); });   // 돌린 직후 innerWidth 가 늦게 바뀌는 브라우저
+      //   🆕 10-19 안드로이드만 «APK 받기»(DECISIONS F-65) — 누르면 내려받기 쪽으로(전체 화면 시도는 안 탄다)
+      if (!/Android/i.test(navigator.userAgent)) document.getElementById("pg-apk").style.display = "none";
+      document.getElementById("pg-apk").addEventListener("click", function (e) { e.stopPropagation(); });
+      document.getElementById("pg-rotate").addEventListener("click", function () {
+        var el = document.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
+        if (!req) return;   // 아이폰 사파리 — 전체 화면이 없다(안내만)
+        Promise.resolve(req.call(el)).then(function () {
+          if (screen.orientation && screen.orientation.lock) return screen.orientation.lock("landscape");
+        }).catch(function () {}).then(function () { setTimeout(pgFit, 300); });
+      });
+
+      document.querySelector("#unity-loading-bar").style.display = "block";
+
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
+              }).then((unityInstance) => {
+                document.querySelector("#unity-loading-bar").style.display = "none";
+                document.querySelector("#unity-fullscreen-button").onclick = () => {
+                  unityInstance.SetFullscreen(1);
+                };
+
+              }).catch((message) => {
+                alert(message);
+              });
+            };
+
+      document.body.appendChild(script);
+
+    </script>
+  </body>
+</html>
