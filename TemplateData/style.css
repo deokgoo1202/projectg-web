@@ -1,0 +1,24 @@
+/* ProjectG — 창 크기 대응(DECISIONS F-58 · 2026-10-14): 검은 바탕 · 스크롤 없음 · 캔버스는 index.html 의 pgFit 이 정수 배율로 맞춘다 */
+html, body { padding: 0; margin: 0; width: 100%; height: 100%; background: #000; overflow: hidden }
+#unity-container { position: absolute }
+#unity-container.unity-desktop { left: 50%; top: 50%; transform: translate(-50%, -50%) }
+#unity-container.unity-mobile { position: fixed; width: 100%; height: 100% }
+#unity-canvas { background: #231F20 }
+.unity-mobile #unity-canvas { width: 100%; height: 100% }
+#unity-loading-bar { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: none }
+/* 10-26 받는 동안 대마법사가 숨 쉰다(DECISIONS F-58 ④) — 대기 36장 띠(53×64 · wizard_v13 대기 줄) ×3 · 12fps. 검은 화면에 글자만 있으면 «안 켜졌다»로 읽힌다 */
+#unity-logo { width: 159px; height: 192px; margin: 0 auto 8px; background: url('pg_hero.png') 0 0 / 5724px 192px no-repeat; image-rendering: pixelated; animation: pg-idle 3s steps(36) infinite }
+@keyframes pg-idle { to { background-position: -5724px 0 } }
+#unity-progress-bar-empty { width: 141px; height: 18px; margin-top: 10px; margin-left: 6.5px; background: url('progress-bar-empty-dark.png') no-repeat center }
+#unity-progress-bar-full { width: 0%; height: 18px; margin-top: 10px; background: url('progress-bar-full-dark.png') no-repeat center }
+#unity-footer { display: none }   /* 바닥 띠를 숨겨 창을 다 쓴다(전체 화면은 F11) */
+.unity-mobile #unity-footer { display: none }
+#unity-logo-title-footer { float:left; width: 102px; height: 38px; background: url('unity-logo-title-footer.png') no-repeat center }
+#unity-build-title { float: right; margin-right: 10px; line-height: 38px; font-family: arial; font-size: 18px }
+#unity-fullscreen-button { cursor:pointer; float: right; width: 38px; height: 38px; background: url('fullscreen-button.png') no-repeat center }
+#pg-rotate { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: #000; color: #e8dcc0; font: 22px/1.6 sans-serif; text-align: center; z-index: 10 }   /* F-58 모바일 — 세로로 들었을 때 */
+#pg-rotate small { font-size: 14px; color: #8a8270 }
+#pg-status { position: fixed; left: 0; right: 0; bottom: 14%; text-align: center; color: #e8dcc0; font: 18px/1.5 sans-serif; z-index: 5; pointer-events: none; white-space: pre-line; padding: 0 16px }   /* 10-26 휴대폰 «검은 화면» — 받는 중 % · 오류를 화면에 */
+#pg-status.pg-err { color: #ff8a80; font-size: 15px; pointer-events: auto }
+#pg-apk { display: inline-block; margin-top: 28px; padding: 8px 16px; font-size: 15px; color: #1a1408; background: #c99a2e; border-radius: 4px; text-decoration: none }
+#unity-warning { position: absolute; left: 50%; top: 5%; transform: translate(-50%); background: white; padding: 10px; display: none }
